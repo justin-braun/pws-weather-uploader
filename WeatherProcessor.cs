@@ -34,17 +34,6 @@ namespace PWSWeatherUploader
             Start();
         }
 
-        public WeatherProcessor(string ulStationId, string ulPassword, string dlStationId, string dlApiToken)
-        {
-            _timer = new Timer(_timerInterval * 60000) { AutoReset = true };
-            _timer.Elapsed += Timer_Elapsed;
-
-            _uploader = new WxDataUploader(ulStationId, ulPassword);
-            _downloader = new WxDataDownloader(dlStationId, dlApiToken);
-
-            Start();
-        }
-
         public void Start()
         {
             _timer.Start();
