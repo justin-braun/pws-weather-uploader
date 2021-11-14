@@ -11,6 +11,8 @@ namespace PWSWeatherUploader.Helpers
     {
         EventLog svcEventLog;
         string _logName = "";
+        string svcSourceName;
+        string svcLogName;
 
         public EventLogger(string logName)
         {
@@ -28,7 +30,10 @@ namespace PWSWeatherUploader.Helpers
                 }
 
                 svcEventLog.Source = logName;
+                svcSourceName = logName;
                 svcEventLog.Log = logName;
+                svcLogName = logName;
+
                 this.WriteEvent(EventLogEntryType.Information, 0, $"The {logName} was successfully created.");
 
             }
@@ -42,6 +47,8 @@ namespace PWSWeatherUploader.Helpers
         {
             try
             {
+                svcEventLog.Source = svcSourceName;
+                svcEventLog.Log = svcLogName;
                 svcEventLog.WriteEntry(text, eventType, eventId);
             }
             catch (Exception ex)

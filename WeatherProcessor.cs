@@ -37,7 +37,7 @@ namespace PWSWeatherUploader
             _downloader = new WxDataDownloader(WeatherFlowStationId, WeatherFlowApiToken);
 
             // Get event log ready
-            eventLogger = new EventLogger("PWSWeatherUploader");
+            eventLogger = new EventLogger("PWSWeatherUploaderService");
 
         }
 
@@ -52,7 +52,7 @@ namespace PWSWeatherUploader
         {
             // Start timer
             _timer.Stop();
-            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1, "PWSWeatherUploader timer stopped.");
+            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 2, "PWSWeatherUploader timer stopped.");
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -71,7 +71,7 @@ namespace PWSWeatherUploader
 
         private void ProcessWeatherObservation()
         {
-            string json;
+            string json = "";
 
             // Download json string from API
             try
@@ -106,12 +106,12 @@ namespace PWSWeatherUploader
                 Logger.LogToScreen($"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
                 eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1001, $"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
 
-                // Save to the settings
+                // Save settings
                 Properties.Settings.Default.LastObsEpoch = stationInfo.Obs[0].Timestamp;
                 Properties.Settings.Default.Save();
 
 
-                // Update variable
+                // Update property with last observation time
                 _lastCheckEpoch = Properties.Settings.Default.LastObsEpoch;
 
             }
