@@ -39,8 +39,18 @@ namespace PWSWeatherUploader
             // Get event log ready
             eventLogger = new EventLogger("PWSWeatherUploader");
 
+        }
+
+        public void Start()
+        {
             // Start timer
             _timer.Start();
+        }
+
+        public void Stop()
+        {
+            // Start timer
+            _timer.Stop();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
