@@ -21,9 +21,9 @@ namespace PWSWeatherUploader
             {
                 x.Service<WeatherProcessor>(s =>
                 {
-                    s.ConstructUsing(uploadSvc => new WeatherProcessor());
-                    s.WhenStarted(uploadSvc => uploadSvc.Start());
-                    s.WhenStopped(uploadSvc => uploadSvc.Stop());
+                    s.ConstructUsing(wp => new WeatherProcessor());
+                    s.WhenStarted(wp => wp.Start());
+                    s.WhenStopped(wp => wp.Stop());
                 }
                 );
 
