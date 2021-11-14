@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Configuration;
+using Topshelf;
 
 namespace PWSWeatherUploader
 {
@@ -16,18 +17,25 @@ namespace PWSWeatherUploader
 
         static void Main(string[] args)
         {
-            // Console Title
-            Console.Title = $"PWSWeather Uploader {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
+            var exitCode = HostFactory.Run(x =>
+            {
+                x.Service<WeatherProcessor>(s =>
+                {
+                    s.ConstructUsing(uploadSvc => new WeatherProcessor());
+                    s.WhenStarted(uploadSvc => uploadSvc.Start());
+                    s.WhenStopped(uploadSvc => uploadSvc.Stop());
+                }
+                );
 
-            // Write the last saved observation to the screen
-            Console.WriteLine($"Last successful observation saved: {Properties.Settings.Default.LastObsEpoch}");
-            Console.WriteLine();
+                x.RunAsLocalSystem();
 
-            //Instantiate the Weather Processor and start getting data
-            WeatherProcessor wp = new WeatherProcessor();
-            wp.Start();
+                x.SetServiceName("PWSWeatherUploader");
+                x.SetDisplayName("PWS Weather Uploader");
+                x.SetDescription("This service uploads data from WeatherFlow Tempest weather stations to AerisWeather's PWSWeather service.");
+            });
 
-            Console.ReadKey();
+            int exitCodeValue = (int)Convert.ChangeType(exitCode, exitCode.GetTypeCode());
+            Environment.ExitCode = exitCodeValue;
 
         }
 

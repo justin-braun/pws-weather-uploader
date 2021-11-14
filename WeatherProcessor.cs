@@ -30,6 +30,8 @@ namespace PWSWeatherUploader
 
             _uploader = new WxDataUploader(PwsStationId, PwsStationUploadPassword);
             _downloader = new WxDataDownloader(WeatherFlowStationId, WeatherFlowApiToken);
+
+            Start();
         }
 
         public WeatherProcessor(string ulStationId, string ulPassword, string dlStationId, string dlApiToken)
@@ -39,6 +41,8 @@ namespace PWSWeatherUploader
 
             _uploader = new WxDataUploader(ulStationId, ulPassword);
             _downloader = new WxDataDownloader(dlStationId, dlApiToken);
+
+            Start();
         }
 
         public void Start()
