@@ -9,10 +9,6 @@ namespace PWSWeatherUploader
 {
     public static class DataLogger
     {
-        // Log File Naming
-        //private static string MissedObsLogFileName = $"missed_observations_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv";
-        //private static string windLogFileName = $"wind_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv";
-
 
         private static string MissedObsLogFileName
         {
