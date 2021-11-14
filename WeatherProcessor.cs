@@ -6,16 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Configuration;
-using PWSWeatherUploader.Helpers;
 
 namespace PWSWeatherUploader
 {   
     public class WeatherProcessor
     {
         private readonly Timer _timer;
-        private Helpers.EventLogger eventLogger;
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("*");
 
-        private int _lastCheckEpoch = 0;
+        private readonly int LastCheckEpoch = Properties.Settings.Default.LastObsEpoch;
         private readonly double _timerInterval = 1; // minutes
 
         private readonly WxDataUploader _uploader; 
@@ -36,23 +35,20 @@ namespace PWSWeatherUploader
             _uploader = new WxDataUploader(PwsStationId, PwsStationUploadPassword);
             _downloader = new WxDataDownloader(WeatherFlowStationId, WeatherFlowApiToken);
 
-            // Get event log ready
-            eventLogger = new EventLogger("PWSWeatherUploaderService");
-
         }
 
         public void Start()
         {
             // Start timer
             _timer.Start();
-            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1, "PWSWeatherUploader initialized.");
+            Logger.Info("PWSWeatherUploaderService initialized.");
         }
 
         public void Stop()
         {
             // Start timer
             _timer.Stop();
-            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 2, "PWSWeatherUploader timer stopped.");
+            Logger.Info("PWSWeatherUploaderService timer was stopped.");
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -64,8 +60,7 @@ namespace PWSWeatherUploader
             }
             catch (Exception ex)
             {
-                Logger.LogToScreen(ex.Message);
-                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1, ex.Message);
+                Logger.WithProperty("EventId", -1).Error(ex.Message);
             }
         }
 
@@ -80,46 +75,40 @@ namespace PWSWeatherUploader
             }
             catch (Exception ex)
             {
-                Logger.LogToScreen("Error getting current observation download.");
-                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1000, $"Error getting current observation download:{Environment.NewLine}{ex.Message}");
+                Logger.WithProperty("EventId", -1000).Error($"Error getting current observation download:{Environment.NewLine}{ex.Message}");
+
             }
 
             // Convert it to something useful
             StationObservationModel.StationInfo stationInfo = JsonConvert.DeserializeObject<StationObservationModel.StationInfo>(json);
 
             // Make sure that the observation is newer than the previous one we stored in var (lastCheckEpoch)
-            if (_lastCheckEpoch < stationInfo.Obs[0].Timestamp)
+            if (LastCheckEpoch < stationInfo.Obs[0].Timestamp)
             {
                 // Record is newer, so upload
                 try
                 {
                     _uploader.UploadToPWSWeather(stationInfo);
+
+                    // Update with last successful upload that we just uploaded
+                    Logger.WithProperty("EventId", 1001).Info($"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
+
+                    // Save settings
+                    Properties.Settings.Default.LastObsEpoch = stationInfo.Obs[0].Timestamp;
+                    Properties.Settings.Default.Save();
+
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogToScreen($"Error uploading the current observation payload.  Error: {ex.Message}");
                     DataLogger.SaveFailedObservation(stationInfo.Obs[0]);
-                    eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1001, $"Error uploading the current observation payload:{Environment.NewLine}{ex.Message}");
+                    Logger.WithProperty("EventId", -1001).Error($"Error uploading the current observation payload:{Environment.NewLine}{ex.Message}");
                 }
-
-                // Update with last successful upload that we just uploaded
-                Logger.LogToScreen($"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
-                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1001, $"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
-
-                // Save settings
-                Properties.Settings.Default.LastObsEpoch = stationInfo.Obs[0].Timestamp;
-                Properties.Settings.Default.Save();
-
-
-                // Update property with last observation time
-                _lastCheckEpoch = Properties.Settings.Default.LastObsEpoch;
 
             }
             else
             {
                 // Record is older from what we can tell, so don't do anything with it.
-                Logger.LogToScreen("A newer observation hasn't been received.  Retrying in 60 seconds...");
-                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Warning, -1002, "A newer observation hasn't been received.  Retrying in 60 seconds.");
+                Logger.WithProperty("EventId", -1002).Warn("A newer observation hasn't been received.  Retrying in 60 seconds.");
             }
         }
     }
