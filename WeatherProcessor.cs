@@ -93,7 +93,7 @@ namespace PWSWeatherUploader
                 // Record is newer, so upload
                 try
                 {
-                    //_uploader.UploadToPWSWeather(stationInfo);
+                    _uploader.UploadToPWSWeather(stationInfo);
                 }
                 catch (Exception ex)
                 {
