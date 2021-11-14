@@ -10,6 +10,7 @@ namespace PWSWeatherUploader
     public static class DataLogger
     {
 
+        // Naming for log files
         private static string MissedObsLogFileName
         {
             get { return $"missed_observations_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv"; ; }
@@ -19,6 +20,36 @@ namespace PWSWeatherUploader
             get { return $"wind_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv"; ; }
         }
 
+        // Save failed observation so we can play it back later.
+        public static void SaveFailedObservation(StationObservationModel.Ob observation)
+        {
+            // If log file doesn't exist, create it and write the header row
+            if (!File.Exists(MissedObsLogFileName))
+            {
+                PrepareMissedObsLogFile();
+            }
+
+            string[] obs = new string[]
+            {
+
+                observation.Timestamp.EpochToDateTimeUtc().ToString("yyyy-MM-dd HH:mm:ss"),
+                observation.WindDirection.ToString(),
+                observation.WindAvg.MsToMph().ToString("0.0"),
+                observation.WindGust.MsToMph().ToString("0.0"),
+                observation.AirTemperature.TempCtoF().ToString("0.0"),
+                observation.Precip.MmToIn().ToString("0.00"),
+                observation.PrecipAccumLocalDay.MmToIn().ToString("0.00"),
+                observation.BarometricPressure.MbToIn().ToString("0.00"),
+                observation.DewPoint.TempCtoF().ToString("0.0"),
+                observation.RelativeHumidity.ToString(),
+                observation.SolarRadiation.ToString(),
+                observation.Uv.ToString("0.0")
+            };
+
+            // Write observation to file
+            File.AppendAllText(MissedObsLogFileName, String.Join(",", obs) + Environment.NewLine);
+
+        }
         private static void PrepareMissedObsLogFile()
         {
             string[] headerRow = new string[] { 
@@ -41,6 +72,7 @@ namespace PWSWeatherUploader
 
         }
 
+        // Used with Web Sockets if we wanted to save specifics on wind readings
         private static void PrepareWindLogFile()
         {
             string[] headerRow = new string[] {
@@ -57,35 +89,8 @@ namespace PWSWeatherUploader
 
         }
 
-        public static void SaveFailedObservation(StationObservationModel.Ob observation)
-        {
-            // If log file doesn't exist, create it and write the header row
-            if (!File.Exists(MissedObsLogFileName))
-            {
-                PrepareMissedObsLogFile();
-            }
 
-            string[] obs = new string[]
-            {
-                
-                observation.Timestamp.EpochToDateTimeUtc().ToString("yyyy-MM-dd HH:mm:ss"),
-                observation.WindDirection.ToString(),
-                observation.WindAvg.MsToMph().ToString("0.0"),
-                observation.WindGust.MsToMph().ToString("0.0"),
-                observation.AirTemperature.TempCtoF().ToString("0.0"),
-                observation.Precip.MmToIn().ToString("0.00"),
-                observation.PrecipAccumLocalDay.MmToIn().ToString("0.00"),
-                observation.BarometricPressure.MbToIn().ToString("0.00"),
-                observation.DewPoint.TempCtoF().ToString("0.0"),
-                observation.RelativeHumidity.ToString(),
-                observation.SolarRadiation.ToString(),
-                observation.Uv.ToString("0.0")
-            };
-
-            // Write observation to file
-            File.AppendAllText(MissedObsLogFileName, String.Join(",", obs) + Environment.NewLine);
-
-    }
+        // Used with Web Sockets if we wanted to save specifics on wind readings
         public static void SaveWindReading(string observation)
         {
             // If log file doesn't exist, create it and write the header row
