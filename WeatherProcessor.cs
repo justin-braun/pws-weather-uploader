@@ -45,12 +45,14 @@ namespace PWSWeatherUploader
         {
             // Start timer
             _timer.Start();
+            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1, "PWSWeatherUploader initialized.");
         }
 
         public void Stop()
         {
             // Start timer
             _timer.Stop();
+            eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1, "PWSWeatherUploader timer stopped.");
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -63,6 +65,7 @@ namespace PWSWeatherUploader
             catch (Exception ex)
             {
                 Logger.LogToScreen(ex.Message);
+                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1, ex.Message);
             }
         }
 
@@ -75,10 +78,10 @@ namespace PWSWeatherUploader
             {
                 json = _downloader.GetCurrentObservation();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Logger.LogToScreen("Error getting current observation download.");
-                throw;
+                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1000, $"Error getting current observation download:{Environment.NewLine}{ex.Message}");
             }
 
             // Convert it to something useful
@@ -96,11 +99,12 @@ namespace PWSWeatherUploader
                 {
                     Logger.LogToScreen($"Error uploading the current observation payload.  Error: {ex.Message}");
                     DataLogger.SaveFailedObservation(stationInfo.Obs[0]);
-                    //throw;
+                    eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Error, -1001, $"Error uploading the current observation payload:{Environment.NewLine}{ex.Message}");
                 }
 
                 // Update with last successful upload that we just uploaded
                 Logger.LogToScreen($"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
+                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Information, 1001, $"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
 
                 // Save to the settings
                 Properties.Settings.Default.LastObsEpoch = stationInfo.Obs[0].Timestamp;
@@ -115,6 +119,7 @@ namespace PWSWeatherUploader
             {
                 // Record is older from what we can tell, so don't do anything with it.
                 Logger.LogToScreen("A newer observation hasn't been received.  Retrying in 60 seconds...");
+                eventLogger.WriteEvent(System.Diagnostics.EventLogEntryType.Warning, -1002, "A newer observation hasn't been received.  Retrying in 60 seconds.");
             }
         }
     }
