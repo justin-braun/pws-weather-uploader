@@ -6,12 +6,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Configuration;
+using PWSWeatherUploader.Helpers;
 
 namespace PWSWeatherUploader
 {   
     public class WeatherProcessor
     {
         private readonly Timer _timer;
+        private Helpers.EventLogger eventLogger;
+
         private int _lastCheckEpoch = 0;
         private readonly double _timerInterval = 1; // minutes
 
@@ -25,12 +28,18 @@ namespace PWSWeatherUploader
 
         public WeatherProcessor()
         {
+            // Setup timer and events
             _timer = new Timer(_timerInterval * 60000) { AutoReset = true };
             _timer.Elapsed += Timer_Elapsed;
 
+            // Instantiate uploader and downloader
             _uploader = new WxDataUploader(PwsStationId, PwsStationUploadPassword);
             _downloader = new WxDataDownloader(WeatherFlowStationId, WeatherFlowApiToken);
 
+            // Get event log ready
+            eventLogger = new EventLogger("PWSWeatherUploader");
+
+            // Start timer
             _timer.Start();
         }
 
