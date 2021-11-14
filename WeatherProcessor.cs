@@ -31,17 +31,7 @@ namespace PWSWeatherUploader
             _uploader = new WxDataUploader(PwsStationId, PwsStationUploadPassword);
             _downloader = new WxDataDownloader(WeatherFlowStationId, WeatherFlowApiToken);
 
-            Start();
-        }
-
-        public void Start()
-        {
             _timer.Start();
-        }
-
-        public void Stop()
-        {
-            _timer.Stop();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
