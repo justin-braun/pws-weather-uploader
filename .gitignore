@@ -353,4 +353,4 @@ MigrationBackup/
 secrets.config
 
 # Nlog custom include
-nlog-mail.config
+nlog-mail*.config
