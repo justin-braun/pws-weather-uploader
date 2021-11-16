@@ -88,7 +88,7 @@ namespace PWSWeatherUploader
                 // Record is newer, so upload
                 try
                 {
-                    _uploader.UploadToPWSWeather(stationInfo);
+                    //_uploader.UploadToPWSWeather(stationInfo);
 
                     // Update with last successful upload that we just uploaded
                     Logger.WithProperty("EventId", 1001).Info($"Observation successfully uploaded for {stationInfo.Obs[0].Timestamp.EpochToDateTimeUtc().ToLocalTime().ToString()}.");
