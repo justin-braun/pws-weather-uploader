@@ -60,7 +60,7 @@ namespace PWSWeatherUploader
             }
             catch (Exception ex)
             {
-                Logger.WithProperty("EventId", -1).Error(ex.Message);
+                Logger.WithProperty("EventId", -1).Error(ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace);
             }
         }
 
@@ -75,7 +75,7 @@ namespace PWSWeatherUploader
             }
             catch (Exception ex)
             {
-                Logger.WithProperty("EventId", -1000).Error($"Error getting current observation download:{Environment.NewLine}{ex.Message}");
+                Logger.WithProperty("EventId", -1000).Error($"Error getting current observation download:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
 
             }
 
@@ -101,7 +101,7 @@ namespace PWSWeatherUploader
                 catch (Exception ex)
                 {
                     DataLogger.SaveFailedObservation(stationInfo.Obs[0]);
-                    Logger.WithProperty("EventId", -1001).Error($"Error uploading the current observation payload:{Environment.NewLine}{ex.Message}");
+                    Logger.WithProperty("EventId", -1001).Error($"Error uploading the current observation payload:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
                 }
 
             }
