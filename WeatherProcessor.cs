@@ -72,18 +72,19 @@ namespace PWSWeatherUploader
             try
             {
                 json = _downloader.GetCurrentObservation();
+
             }
             catch (Exception ex)
             {
                 Logger.WithProperty("EventId", -1000).Error($"Error getting current observation download:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
-
+                return;
             }
 
             // Convert it to something useful
             StationObservationModel.StationInfo stationInfo = JsonConvert.DeserializeObject<StationObservationModel.StationInfo>(json);
 
             // Make sure that the observation is newer than the previous one we stored in var (lastCheckEpoch)
-            if (LastCheckEpoch < stationInfo.Obs[0].Timestamp)
+            if (stationInfo != null && LastCheckEpoch < stationInfo.Obs[0].Timestamp)
             {
                 // Record is newer, so upload
                 try
