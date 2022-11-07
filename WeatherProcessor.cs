@@ -41,6 +41,9 @@ namespace PWSWeatherUploader
 
         public void Start()
         {
+            // Execute initial run before starting timer
+           Timer_Elapsed(null, null);
+
             // Start timer
             _timer.Start();
             Logger.Info("PWSWeatherUploaderService initialized.");
