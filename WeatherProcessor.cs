@@ -16,7 +16,6 @@ namespace PWSWeatherUploader
         private readonly Timer _timer;
         private static readonly NLog.Logger Logger = NLog.LogManager.GetLogger("*");
 
-        private readonly int LastCheckEpoch = Properties.Settings.Default.LastObsEpoch;
         private readonly double _timerInterval = 1; // minutes
 
         private readonly WxDataUploader _uploader; 
@@ -41,12 +40,15 @@ namespace PWSWeatherUploader
 
         public void Start()
         {
+
+            Logger.Info("PWSWeatherUploaderService initialized.");
+
             // Execute initial run before starting timer
-           Timer_Elapsed(null, null);
+            Timer_Elapsed(null, null);
 
             // Start timer
             _timer.Start();
-            Logger.Info("PWSWeatherUploaderService initialized.");
+            
         }
 
         public void Stop()
@@ -109,7 +111,7 @@ namespace PWSWeatherUploader
             {
                 //Observation exists
                 // Check if it is newer than the previous recorded observation
-                if (LastCheckEpoch < stationInfo.Obs[0].Timestamp)
+                if (Properties.Settings.Default.LastObsEpoch < stationInfo.Obs[0].Timestamp)
                 {
                     // Upload new observation
                     UploadObservationToPWS(stationInfo);
@@ -167,7 +169,7 @@ namespace PWSWeatherUploader
             StationObservationModel.StationInfo stationInfo = JsonConvert.DeserializeObject<StationObservationModel.StationInfo>(json);
 
             // Make sure that the observation is newer than the previous one we stored in var (lastCheckEpoch)
-            if (stationInfo != null && LastCheckEpoch < stationInfo.Obs[0].Timestamp)
+            if (stationInfo != null && Properties.Settings.Default.LastObsEpoch < stationInfo.Obs[0].Timestamp)
             {
                 // Record is newer, so upload
                 try

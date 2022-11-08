@@ -10,11 +10,13 @@ namespace PWSWeatherUploader
     public static class DataLogger
     {
 
+        private const string MISSED_OBS_FILE = "missed_observations.csv";
+
         // Naming for log files
-        private static string MissedObsLogFileName
-        {
-            get { return $"missed_observations_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv"; ; }
-        }
+        //private static string MissedObsLogFileName
+        //{
+        //    get { return $"missed_observations_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv"; ; }
+        //}
         private static string windLogFileName
         {
             get { return $"wind_{DateTime.Now.Year.ToString()}{DateTime.Now.Month.ToString("d2")}{DateTime.Now.Day.ToString("d2")}.csv"; ; }
@@ -24,7 +26,7 @@ namespace PWSWeatherUploader
         public static void SaveFailedObservation(StationObservationModel.Ob observation)
         {
             // If log file doesn't exist, create it and write the header row
-            if (!File.Exists(MissedObsLogFileName))
+            if (!File.Exists(MISSED_OBS_FILE))
             {
                 PrepareMissedObsLogFile();
             }
@@ -47,7 +49,7 @@ namespace PWSWeatherUploader
             };
 
             // Write observation to file
-            File.AppendAllText(MissedObsLogFileName, String.Join(",", obs) + Environment.NewLine);
+            File.AppendAllText(MISSED_OBS_FILE, String.Join(",", obs) + Environment.NewLine);
 
         }
         private static void PrepareMissedObsLogFile()
@@ -68,7 +70,7 @@ namespace PWSWeatherUploader
             };
 
             // Create/Append to log file
-            File.AppendAllText(MissedObsLogFileName, String.Join(",", headerRow) + Environment.NewLine);
+            File.AppendAllText(MISSED_OBS_FILE, String.Join(",", headerRow) + Environment.NewLine);
 
         }
 
