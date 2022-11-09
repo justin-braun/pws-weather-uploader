@@ -80,14 +80,14 @@ namespace PWSWeatherUploader
                 // If trigger is hit, then notify
                 if(errorCount >= errorMaxTrigger)
                 {
-                    Logger.WithProperty("EventId", -1000).Error($"Error processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
+                    Logger.WithProperty("EventId", -1000).Error($"Error occurred {errorCount} time(s) processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
                     
                     // Reset counter
                     errorCount = 0;
                 }
                 else
                 {
-                    Logger.WithProperty("EventId", -1000).Warn($"Error processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
+                    Logger.WithProperty("EventId", -1000).Warn($"Error occurred {errorCount} time(s) processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
                 }
 
             }
