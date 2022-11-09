@@ -26,6 +26,9 @@ namespace PWSWeatherUploader
         private readonly string WeatherFlowStationId = ConfigurationManager.AppSettings["weatherFlowStationId"];
         private readonly string WeatherFlowApiToken = ConfigurationManager.AppSettings["weatherFlowApiToken"];
 
+        private int errorCount = 0;
+        private int errorMaxTrigger = 30; // allow for 30 minutes of errors before trigger
+
         public WeatherProcessor()
         {
             // Setup timer and events
@@ -64,10 +67,29 @@ namespace PWSWeatherUploader
             try
             {
                 ProcessNewObservation();
+
+                // Reset error count after successful execution
+                errorCount = 0;
+
             }
             catch (Exception ex)
             {
-                Logger.WithProperty("EventId", -1000).Error($"Error processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
+                // Increment error count
+                errorCount++;
+
+                // If trigger is hit, then notify
+                if(errorCount >= errorMaxTrigger)
+                {
+                    Logger.WithProperty("EventId", -1000).Error($"Error processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
+                    
+                    // Reset counter
+                    errorCount = 0;
+                }
+                else
+                {
+                    Logger.WithProperty("EventId", -1000).Warn($"Error processing observation:{Environment.NewLine}{ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace}");
+                }
+
             }
         }
 
